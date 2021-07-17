@@ -24,6 +24,28 @@ function ProfileSideBar(props) {
   )
 }
 
+function ProfileRelationsBox(props) {
+  return (
+    <ProfileRelationsBoxWrapper>
+          <h2 className="smallTitle">
+            {props.title} ({props.items.length})
+          </h2>
+          <ul>
+              {/* {seguidores.map((itemAtual) => {
+                return (
+                  <li key={itemAtual}>
+                    <a href={`https://www.github.com/${itemAtual}.png`}>
+                    <img src={itemAtual} />
+                    <span>{itemAtual}</span>
+                    </a>
+                  </li>
+                )
+              })} */}
+            </ul>
+        </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
 
   const githubUser = "Gabrielzkk";
@@ -33,12 +55,24 @@ export default function Home() {
     image: "https://alurakut.vercel.app/capa-comunidade-01.jpg"
   }]);
   
-  // const comunidades = ["Alurakut"];
   const pessoasFavoritas = ["peas", "filipedeschamps", "juunegreiros", "omariosouto", "douglasquintanilha"];
 
+  const [seguidores, setSeguidores] = React.useState([])
+    React.useEffect(function () {
+
+      fetch("https://api.github.com/users/filipedeschamps/followers")
+      .then(function (respostaDoServidor) {
+        return respostaDoServidor.json();
+      })
+      .then(function (respostaCompleta) {
+        setSeguidores(respostaCompleta);
+      })
+
+    }, []);
+
+    console.log("Seguidores antes do return: ", seguidores)
 
   return (
-
   <>
     <AlurakutMenu />
     <MainGrid>
@@ -99,6 +133,8 @@ export default function Home() {
       </div>
 
       <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea'}}>
+      
+        <ProfileRelationsBox title="Seguidores" items={seguidores}/>
         <ProfileRelationsBoxWrapper>
           <h2 className="smallTitle">
             Comunidades ({comunidades.length})

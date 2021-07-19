@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import nookies from "nookies";
+import jwt from "jsonwebtoken";
 import MainGrid from '../src/componentes/MainGrid';
 import Box from "../src/componentes/Box";
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from "../src/lib/AlurakutCommons";
@@ -46,9 +48,9 @@ function ProfileRelationsBox(props) {
   )
 }
 
-export default function Home() {
+export default function Home(props) {
 
-  const githubUser = "Gabrielzkk";
+  const githubUser = props.githubUser;
   const [comunidades, setComunidades] = React.useState([]);
   
   const pessoasFavoritas = ["peas", "filipedeschamps", "juunegreiros", "omariosouto", "douglasquintanilha"];
@@ -57,7 +59,7 @@ export default function Home() {
 
     React.useEffect(function () {
 
-      fetch("https://api.github.com/users/filipedeschamps/followers")
+      fetch("https://api.github.com/users/Gabrielzkk/followers")
       .then(function (respostaDoServidor) {
         return respostaDoServidor.json();
       })
@@ -91,8 +93,6 @@ export default function Home() {
       })
 
     }, []);
-
-    console.log("Seguidores antes do return: ", seguidores)
 
   return (
   <>
@@ -170,6 +170,7 @@ export default function Home() {
       <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea'}}>
       
         <ProfileRelationsBox title="Seguidores" items={seguidores}/>
+
         <ProfileRelationsBoxWrapper>
           <h2 className="smallTitle">
             Comunidades ({comunidades.length})
@@ -212,4 +213,34 @@ export default function Home() {
     </MainGrid>
   </>
   )
+}
+
+export async function getServerSideProps(context) {
+
+  const cookies = nookies.get(context)
+  const token = cookies.USER_TOKEN
+
+  const { isAuthenticated } = await fetch("https://alurakut.vercel.app/api/auth", {
+    headers: {
+      Authorization: token
+    }
+  })
+  .then((resposta) => resposta.json())
+
+    if (!isAuthenticated) {
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false
+        }
+      }
+    }
+
+  const { githubUser } = jwt.decode(token)
+
+  return {
+    props: {
+      githubUser
+    },
+  }
 }
